@@ -75,7 +75,7 @@ let tree = BehaviorTree::new(
 | Blackboard Inspector Panel | :x: | :white_check_mark: |
 | Priority Support | :x: | :white_check_mark: |
 
-**[Get the Pro version on Gumroad](https://gumroad.com/)** <!-- TODO: Replace with actual link -->
+**[Get the Pro version on itch.io](https://itch.io/)** <!-- TODO: Replace with actual link -->
 
 ## License
 
