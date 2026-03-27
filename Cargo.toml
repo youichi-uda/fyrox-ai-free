@@ -1,0 +1,12 @@
+[package]
+name = "fyrox-ai-free"
+version = "0.1.0"
+edition = "2021"
+description = "AI State Machine and Behavior Tree for Fyrox game engine (free version)"
+license = "MIT"
+keywords = ["ai", "state-machine", "behavior-tree", "game", "fyrox"]
+categories = ["game-development"]
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+nalgebra = "0.34"
