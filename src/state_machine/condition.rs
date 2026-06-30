@@ -90,6 +90,36 @@ impl Condition {
         Self::new(key, CompareOp::Equal, BlackboardValue::Bool(false))
     }
 
+    /// Shorthand for `key == value` ([`CompareOp::Equal`]).
+    pub fn eq(key: impl Into<String>, value: BlackboardValue) -> Self {
+        Self::new(key, CompareOp::Equal, value)
+    }
+
+    /// Shorthand for `key != value` ([`CompareOp::NotEqual`]).
+    pub fn neq(key: impl Into<String>, value: BlackboardValue) -> Self {
+        Self::new(key, CompareOp::NotEqual, value)
+    }
+
+    /// Shorthand for `key > value` ([`CompareOp::Greater`]).
+    pub fn gt(key: impl Into<String>, value: BlackboardValue) -> Self {
+        Self::new(key, CompareOp::Greater, value)
+    }
+
+    /// Shorthand for `key < value` ([`CompareOp::Less`]).
+    pub fn lt(key: impl Into<String>, value: BlackboardValue) -> Self {
+        Self::new(key, CompareOp::Less, value)
+    }
+
+    /// Shorthand for `key >= value` ([`CompareOp::GreaterOrEqual`]).
+    pub fn gte(key: impl Into<String>, value: BlackboardValue) -> Self {
+        Self::new(key, CompareOp::GreaterOrEqual, value)
+    }
+
+    /// Shorthand for `key <= value` ([`CompareOp::LessOrEqual`]).
+    pub fn lte(key: impl Into<String>, value: BlackboardValue) -> Self {
+        Self::new(key, CompareOp::LessOrEqual, value)
+    }
+
     /// Evaluates this condition against `blackboard`. Returns `false` if the key is missing or
     /// the stored value has a different type than the expected value.
     pub fn evaluate(&self, blackboard: &Blackboard) -> bool {
@@ -167,5 +197,40 @@ impl ConditionNode {
             Self::Or(children) => children.iter().any(|c| c.evaluate(blackboard)),
             Self::Not(child) => !child.evaluate(blackboard),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn comparison_shortcuts_build_expected_op() {
+        let cases = [
+            (Condition::eq("k", BlackboardValue::Int(1)), CompareOp::Equal),
+            (Condition::neq("k", BlackboardValue::Int(1)), CompareOp::NotEqual),
+            (Condition::gt("k", BlackboardValue::Int(1)), CompareOp::Greater),
+            (Condition::lt("k", BlackboardValue::Int(1)), CompareOp::Less),
+            (Condition::gte("k", BlackboardValue::Int(1)), CompareOp::GreaterOrEqual),
+            (Condition::lte("k", BlackboardValue::Int(1)), CompareOp::LessOrEqual),
+        ];
+        for (cond, expected) in cases {
+            assert_eq!(cond.op, expected);
+            assert_eq!(cond.key, "k");
+        }
+    }
+
+    #[test]
+    fn comparison_shortcuts_evaluate_against_blackboard() {
+        let mut bb = Blackboard::new();
+        bb.set_int("hp", 50);
+
+        assert!(Condition::gt("hp", BlackboardValue::Int(10)).evaluate(&bb));
+        assert!(!Condition::gt("hp", BlackboardValue::Int(100)).evaluate(&bb));
+        assert!(Condition::gte("hp", BlackboardValue::Int(50)).evaluate(&bb));
+        assert!(Condition::lte("hp", BlackboardValue::Int(50)).evaluate(&bb));
+        assert!(Condition::lt("hp", BlackboardValue::Int(51)).evaluate(&bb));
+        assert!(Condition::neq("hp", BlackboardValue::Int(0)).evaluate(&bb));
+        assert!(Condition::eq("hp", BlackboardValue::Int(50)).evaluate(&bb));
     }
 }
