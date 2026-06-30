@@ -188,6 +188,25 @@ impl BtNode {
         Self::Inverter { name: name.into(), child: Box::new(child) }
     }
 
+    /// Builds a [`BtNode::Parallel`]. `success_threshold` of `0` means *all* children must succeed.
+    pub fn parallel(
+        name: impl Into<String>,
+        children: Vec<BtNode>,
+        success_threshold: usize,
+    ) -> Self {
+        Self::Parallel { name: name.into(), children, success_threshold }
+    }
+
+    /// Builds a [`BtNode::Repeater`]. `max_count` of `0` repeats forever.
+    pub fn repeater(name: impl Into<String>, child: BtNode, max_count: u32) -> Self {
+        Self::Repeater { name: name.into(), child: Box::new(child), max_count }
+    }
+
+    /// Builds a [`BtNode::AlwaysSucceed`] decorator.
+    pub fn always_succeed(name: impl Into<String>, child: BtNode) -> Self {
+        Self::AlwaysSucceed { name: name.into(), child: Box::new(child) }
+    }
+
     /// Returns this node's name.
     pub fn name(&self) -> &str {
         match self {
@@ -337,5 +356,38 @@ impl BtNode {
 
         runtime.node_states[node_id].last_status = status;
         (status, next_id)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn parallel_repeater_always_succeed_builders() {
+        let p = BtNode::parallel("P", vec![BtNode::action("a", "id_a")], 1);
+        match p {
+            BtNode::Parallel { name, children, success_threshold } => {
+                assert_eq!(name, "P");
+                assert_eq!(children.len(), 1);
+                assert_eq!(success_threshold, 1);
+            }
+            _ => panic!("expected Parallel"),
+        }
+
+        let r = BtNode::repeater("R", BtNode::action("a", "id_a"), 3);
+        match r {
+            BtNode::Repeater { name, max_count, .. } => {
+                assert_eq!(name, "R");
+                assert_eq!(max_count, 3);
+            }
+            _ => panic!("expected Repeater"),
+        }
+
+        let s = BtNode::always_succeed("AS", BtNode::action("a", "id_a"));
+        match s {
+            BtNode::AlwaysSucceed { name, .. } => assert_eq!(name, "AS"),
+            _ => panic!("expected AlwaysSucceed"),
+        }
     }
 }
