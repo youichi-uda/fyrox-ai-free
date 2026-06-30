@@ -33,6 +33,7 @@
 pub mod behavior_tree;
 pub mod blackboard;
 pub mod state_machine;
+pub mod validate;
 
 pub use behavior_tree::{
     node::{BtContext, BtNode, BtRuntime, BtStatus},
@@ -45,3 +46,4 @@ pub use state_machine::{
     transition::AiTransition,
     AiStateMachine, AiStateMachineEvent,
 };
+pub use validate::ValidationError;
