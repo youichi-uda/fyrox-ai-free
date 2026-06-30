@@ -1,6 +1,6 @@
 [package]
 name = "fyrox-ai-free"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2021"
 description = "AI State Machine and Behavior Tree for Fyrox game engine (free version)"
 license = "MIT"
