@@ -63,6 +63,14 @@ impl BlackboardValue {
             _ => None,
         }
     }
+
+    /// Returns the `(x, y, z)` tuple if this is a [`BlackboardValue::Vec3`], otherwise `None`.
+    pub fn as_vec3(&self) -> Option<(f32, f32, f32)> {
+        match self {
+            Self::Vec3 { x, y, z } => Some((*x, *y, *z)),
+            _ => None,
+        }
+    }
 }
 
 /// Shared data store for AI decision-making. Scripts write sensor data here,
@@ -81,6 +89,31 @@ impl Blackboard {
     /// Inserts or overwrites the value stored under `key`.
     pub fn set(&mut self, key: impl Into<String>, value: BlackboardValue) {
         self.entries.insert(key.into(), value);
+    }
+
+    /// Typed shorthand for `set(key, BlackboardValue::Bool(value))`.
+    pub fn set_bool(&mut self, key: impl Into<String>, value: bool) {
+        self.set(key, BlackboardValue::Bool(value));
+    }
+
+    /// Typed shorthand for `set(key, BlackboardValue::Int(value))`.
+    pub fn set_int(&mut self, key: impl Into<String>, value: i64) {
+        self.set(key, BlackboardValue::Int(value));
+    }
+
+    /// Typed shorthand for `set(key, BlackboardValue::Float(value))`.
+    pub fn set_float(&mut self, key: impl Into<String>, value: f32) {
+        self.set(key, BlackboardValue::Float(value));
+    }
+
+    /// Typed shorthand for `set(key, BlackboardValue::String(value.into()))`.
+    pub fn set_string(&mut self, key: impl Into<String>, value: impl Into<String>) {
+        self.set(key, BlackboardValue::String(value.into()));
+    }
+
+    /// Typed shorthand for `set(key, BlackboardValue::Vec3 { x, y, z })`.
+    pub fn set_vec3(&mut self, key: impl Into<String>, x: f32, y: f32, z: f32) {
+        self.set(key, BlackboardValue::Vec3 { x, y, z });
     }
 
     /// Returns a reference to the value stored under `key`, if any.
@@ -108,6 +141,19 @@ impl Blackboard {
         self.get(key).and_then(|v| v.as_string())
     }
 
+    /// Returns the `(x, y, z)` tuple stored under `key`, if it exists and is a [`BlackboardValue::Vec3`].
+    ///
+    /// # Example
+    /// ```
+    /// use fyrox_ai_free::Blackboard;
+    /// let mut bb = Blackboard::new();
+    /// bb.set_vec3("target", 1.0, 2.0, 3.0);
+    /// assert_eq!(bb.get_vec3("target"), Some((1.0, 2.0, 3.0)));
+    /// ```
+    pub fn get_vec3(&self, key: &str) -> Option<(f32, f32, f32)> {
+        self.get(key).and_then(|v| v.as_vec3())
+    }
+
     /// Removes the value stored under `key`, returning it if it existed.
     pub fn remove(&mut self, key: &str) -> Option<BlackboardValue> {
         self.entries.remove(key)
@@ -126,5 +172,37 @@ impl Blackboard {
     /// Returns an iterator over all `(key, value)` pairs. Order is unspecified.
     pub fn iter(&self) -> impl Iterator<Item = (&String, &BlackboardValue)> {
         self.entries.iter()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn typed_setters_and_vec3_accessor_roundtrip() {
+        let mut bb = Blackboard::new();
+        bb.set_bool("alive", true);
+        bb.set_int("score", 42);
+        bb.set_float("health", 0.75);
+        bb.set_string("name", "Goblin");
+        bb.set_vec3("pos", 1.0, 2.0, 3.0);
+
+        assert_eq!(bb.get_bool("alive"), Some(true));
+        assert_eq!(bb.get_int("score"), Some(42));
+        assert_eq!(bb.get_float("health"), Some(0.75));
+        assert_eq!(bb.get_string("name"), Some("Goblin"));
+        assert_eq!(bb.get_vec3("pos"), Some((1.0, 2.0, 3.0)));
+
+        // wrong-type / missing key returns None
+        assert_eq!(bb.get_vec3("alive"), None);
+        assert_eq!(bb.get_vec3("missing"), None);
+
+        // BlackboardValue::as_vec3 directly
+        assert_eq!(
+            BlackboardValue::Vec3 { x: 4.0, y: 5.0, z: 6.0 }.as_vec3(),
+            Some((4.0, 5.0, 6.0))
+        );
+        assert_eq!(BlackboardValue::Bool(true).as_vec3(), None);
     }
 }
