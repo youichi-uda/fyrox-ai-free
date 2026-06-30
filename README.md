@@ -7,10 +7,12 @@ Build enemy AI like **Patrol -> Chase -> Attack -> Patrol** without writing spag
 ## Features
 
 - **AI State Machine** - Define states and transitions with condition-based rules
-- **Behavior Tree** - Sequence, Selector, Parallel, Inverter, Repeater, Wait nodes
+- **Behavior Tree** - `Sequence`, `Selector`, `Inverter`, `Repeater`, `AlwaysSucceed`, `ConditionCheck`, `Action`, `Parallel`, `Wait` nodes
 - **Blackboard** - Shared data store for AI decision-making
 - **Condition System** - Composable logic trees (And/Or/Not) with comparison operators
 - **Serializable** - All data structures support serde for save/load
+
+MSRV: Rust 1.87.
 
 ## Quick Start
 
@@ -75,7 +77,7 @@ let tree = BehaviorTree::new(
 | Blackboard Inspector Panel | :x: | :white_check_mark: |
 | Priority Support | :x: | :white_check_mark: |
 
-**[Get the Pro version on itch.io](https://itch.io/)** <!-- TODO: Replace with actual link -->
+**[Get the Pro version on itch.io](https://y1uda.itch.io/fyrox-ai-pro)**
 
 ## License
 

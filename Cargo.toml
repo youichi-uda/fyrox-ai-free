@@ -6,6 +6,8 @@ description = "AI State Machine and Behavior Tree for Fyrox game engine (free ve
 license = "MIT"
 keywords = ["ai", "state-machine", "behavior-tree", "game", "fyrox"]
 categories = ["game-development"]
+rust-version = "1.87"
+readme = "README.md"
 
 [dependencies]
 serde = { version = "1", features = ["derive"] }

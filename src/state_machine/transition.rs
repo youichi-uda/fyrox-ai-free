@@ -1,9 +1,12 @@
+//! Transitions ([`AiTransition`]) connecting two states with a firing condition.
+
 use super::condition::ConditionNode;
 use serde::{Deserialize, Serialize};
 
 /// A transition between two AI states.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AiTransition {
+    /// Human-readable transition name.
     pub name: String,
     /// Source state index.
     pub from: usize,
@@ -28,6 +31,7 @@ impl Default for AiTransition {
 }
 
 impl AiTransition {
+    /// Creates a transition from state index `from` to `to` that fires when `condition` is true.
     pub fn new(
         name: impl Into<String>,
         from: usize,
@@ -43,6 +47,7 @@ impl AiTransition {
         }
     }
 
+    /// Sets the minimum time the source state must be active before this transition can fire.
     pub fn with_min_time(mut self, seconds: f32) -> Self {
         self.min_time_in_state = seconds;
         self

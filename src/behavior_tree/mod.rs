@@ -1,3 +1,5 @@
+//! Behavior tree ([`BehaviorTree`]) that drives AI decision-making.
+
 pub mod node;
 
 use crate::blackboard::Blackboard;
@@ -6,6 +8,9 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 /// A behavior tree that drives AI decision-making.
+///
+/// The tree itself is immutable data; per-evaluation state (which child is running, elapsed
+/// wait time, etc.) lives in a separate [`BtRuntime`] created via [`BehaviorTree::create_runtime`].
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct BehaviorTree {
     root: BtNode,
@@ -13,19 +18,29 @@ pub struct BehaviorTree {
 }
 
 impl BehaviorTree {
+    /// Creates an active behavior tree with the given root node.
     pub fn new(root: BtNode) -> Self {
         Self { root, active: true }
     }
 
+    /// Returns the root node.
     pub fn root(&self) -> &BtNode { &self.root }
+    /// Returns a mutable reference to the root node.
     pub fn root_mut(&mut self) -> &mut BtNode { &mut self.root }
+    /// Returns `true` if the tree is active. An inactive tree returns [`BtStatus::Failure`] on tick.
     pub fn is_active(&self) -> bool { self.active }
+    /// Enables or disables evaluation.
     pub fn set_active(&mut self, active: bool) { self.active = active; }
 
+    /// Allocates a fresh [`BtRuntime`] sized for this tree.
     pub fn create_runtime(&self) -> BtRuntime {
         BtRuntime::new(&self.root)
     }
 
+    /// Evaluates the tree for one tick.
+    ///
+    /// `action_results` maps action ids to the status reported by the game for each leaf
+    /// [`BtNode::Action`]; missing ids keep their previous status. Returns the root status.
     pub fn tick(
         &self, dt: f32, blackboard: &Blackboard,
         action_results: &HashMap<String, BtStatus>, runtime: &mut BtRuntime,
